@@ -1,0 +1,130 @@
+import numpy as np
+import pandas as pd
+from sklearn import preprocessing
+from sklearn import metrics
+import statsmodels.api as sm
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import KFold,cross_val_score,train_test_split,LeaveOneOut
+from sklearn.svm import SVR,SVC
+from sklearn.preprocessing import StandardScaler
+
+veriler = pd.read_csv('ReplicatedAcousticFeatures-ParkinsonDatabase.csv')
+
+
+minmax_scale = preprocessing.MinMaxScaler().fit(veriler.iloc[:,3:48])
+df_minmax = minmax_scale.transform(veriler.iloc[:,3:48])
+
+ 
+x=df_minmax
+y=veriler.iloc[:,2]
+
+Y=y.values 
+"X=x.values"
+
+x_train, x_test,y_train,y_test = train_test_split(x,Y,test_size=0.33, random_state=0)
+acc_score = []
+
+
+sc=StandardScaler()
+X_train = sc.fit_transform(x_train)
+X_test = sc.transform(x_test)
+sc1=StandardScaler() 
+x_olcekli = sc1.fit_transform(x) 
+sc2=StandardScaler() 
+y_olcekli = np.ravel(sc2.fit_transform(Y.reshape(-1,1)))
+
+
+svr_reg = SVR(kernel='rbf')
+svr_reg.fit(x_olcekli,y_olcekli)
+
+print('SVR OLS')
+model3=sm.OLS(svr_reg.predict(x_olcekli),x_olcekli)
+print(model3.fit().summary())
+
+
+#Support Vector Machine sigmoid
+
+svc = SVC(kernel='poly')
+svc.fit(x_train,y_train)
+
+y_pred = svc.predict(x_test)
+
+cm = confusion_matrix(y_test,y_pred)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+print('SVC-Sigmoid')
+print(cm)
+print(accuracy)
+
+#Support Vector Machine rbf
+
+svcrbf = SVC(kernel='rbf')
+svcrbf.fit(x_train,y_train)
+
+y_pred = svcrbf.predict(x_test)
+
+cm = confusion_matrix(y_test,y_pred)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+print('SVC-rbf')
+print(cm)
+print(accuracy)
+
+scores=cross_val_score(svc,x,y,cv=5)
+print(scores)
+
+print(scores.mean())
+
+kfold=KFold(n_splits=3,shuffle=True,random_state=0)
+print(cross_val_score(svcrbf,x,y,cv=kfold))
+
+loo=LeaveOneOut()
+scores=cross_val_score(svcrbf,x,y,cv=loo)
+print(scores.mean())
+
+
+#Support Vector Machine linear
+svcl = SVC(kernel='linear')
+svcl.fit(x_train,y_train)
+
+y_pred = svcl.predict(x_test)
+
+cm = confusion_matrix(y_test,y_pred)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+print('SVC-linear')
+print(cm)
+print(accuracy)
+
+scores=cross_val_score(svcl,x,y,cv=5)
+print(scores)
+
+print(scores.mean())
+
+kfold=KFold(n_splits=3,shuffle=True,random_state=0)
+print(cross_val_score(svcl,x,y,cv=kfold))
+
+loo=LeaveOneOut()
+scores=cross_val_score(svcl,x,y,cv=loo)
+print(scores.mean())
+
+#Support Vector Machine poly
+svcpoly = SVC(kernel='poly')
+svcpoly.fit(x_train,y_train)
+
+y_pred = svc.predict(x_test)
+
+cm = confusion_matrix(y_test,y_pred)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+print('SVC-poly')
+print(cm)
+print(accuracy)
+
+scores=cross_val_score(svcpoly,x,y,cv=5)
+print(scores)
+
+print(scores.mean())
+
+kfold=KFold(n_splits=3,shuffle=True,random_state=0)
+print(cross_val_score(svcpoly,x,y,cv=kfold))
+
+loo=LeaveOneOut()
+scores=cross_val_score(svcpoly,x,y,cv=loo)
+print(scores.mean())
