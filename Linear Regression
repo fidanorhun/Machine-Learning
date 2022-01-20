@@ -1,0 +1,59 @@
+import pandas as pd
+from sklearn import preprocessing
+from sklearn import metrics
+import statsmodels.api as sm
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import KFold,cross_val_score,train_test_split,LeaveOneOut
+from sklearn.linear_model import LogisticRegression,LinearRegression
+
+veriler = pd.read_csv('ReplicatedAcousticFeatures-ParkinsonDatabase.csv')
+
+
+minmax_scale = preprocessing.MinMaxScaler().fit(veriler.iloc[:,3:48])
+df_minmax = minmax_scale.transform(veriler.iloc[:,3:48])
+
+ 
+x=df_minmax
+y=veriler.iloc[:,2]
+
+Y=y.values 
+"X=x.values"
+
+x_train, x_test,y_train,y_test = train_test_split(x,Y,test_size=0.33, random_state=0)
+acc_score = []
+
+
+#Linear Regression
+regressor = LinearRegression()
+regressor.fit(x_train,y_train)
+y_pred = regressor.predict(x_test)
+
+model=sm.OLS(regressor.predict(x_test),x_test)
+print(model.fit().summary())
+print("Linear Regression R2 ")
+
+logr = LogisticRegression(solver="lbfgs",multi_class="auto",max_iter=100)
+logr.fit(x_train,y_train)
+
+y_pred = logr.predict(x_test)
+print(y_pred)
+print(y_test)
+
+
+cm = confusion_matrix(y_test,y_pred)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+print("Linear")
+print(cm)
+print(accuracy)
+
+scores=cross_val_score(logr,x,y,cv=10)
+print(scores)
+
+print(scores.mean())
+
+kfold=KFold(n_splits=3,shuffle=True,random_state=0)
+print(cross_val_score(logr,x,y,cv=kfold))
+
+loo=LeaveOneOut()
+scores=cross_val_score(logr,x,y,cv=loo)
+print(scores.mean())
