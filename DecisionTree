@@ -1,0 +1,82 @@
+import pandas as pd
+from sklearn import preprocessing
+from sklearn import metrics
+import statsmodels.api as sm
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import KFold,cross_val_score,train_test_split,LeaveOneOut
+from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor
+
+
+veriler = pd.read_csv('ReplicatedAcousticFeatures-ParkinsonDatabase.csv')
+
+
+minmax_scale = preprocessing.MinMaxScaler().fit(veriler.iloc[:,3:48])
+df_minmax = minmax_scale.transform(veriler.iloc[:,3:48])
+
+ 
+x=df_minmax
+y=veriler.iloc[:,2]
+
+Y=y.values 
+"X=x.values"
+
+x_train, x_test,y_train,y_test = train_test_split(x,Y,test_size=0.33, random_state=0)
+acc_score = []
+
+
+r_dt = DecisionTreeRegressor(random_state=0)
+r_dt.fit(x_test,y_test)
+
+print('Decision Tree OLS')
+model4=sm.OLS(r_dt.predict(x_train),x_train)
+print(model4.fit().summary())
+
+#Karar Ağacı entropy
+
+dtc = DecisionTreeClassifier(criterion = 'entropy')
+
+dtc.fit(x_train,y_train)
+y_pred = dtc.predict(x_test)
+
+cm = confusion_matrix(y_test,y_pred)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+print('DTC entropy')
+print(cm)
+print(accuracy)
+
+scores=cross_val_score(dtc,x,y,cv=10)
+print(scores)
+
+print(scores.mean())
+
+kfold=KFold(n_splits=3,shuffle=True,random_state=0)
+print(cross_val_score(dtc,x,y,cv=kfold))
+
+loo=LeaveOneOut()
+scores=cross_val_score(dtc,x,y,cv=loo)
+print(scores.mean())
+
+#Karar Ağacı gini
+dtcgini = DecisionTreeClassifier(criterion = 'gini')
+
+dtcgini.fit(x_train,y_train)
+y_pred = dtcgini.predict(x_test)
+
+cm = confusion_matrix(y_test,y_pred)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+print('DTC gini')
+print(cm)
+print(accuracy)
+
+scores=cross_val_score(dtcgini,x,y,cv=10)
+print(scores)
+
+print(scores.mean())
+
+kfold=KFold(n_splits=3,shuffle=True,random_state=0)
+print(cross_val_score(dtcgini,x,y,cv=kfold))
+
+loo=LeaveOneOut()
+scores=cross_val_score(dtcgini,x,y,cv=loo)
+print(scores.mean())
