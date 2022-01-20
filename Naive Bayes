@@ -1,0 +1,48 @@
+#Naive Bayes GaussianNB
+from sklearn.naive_bayes import GaussianNB
+gnb = GaussianNB()
+gnb.fit(x_train, y_train)
+
+y_pred = gnb.predict(x_test)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+cm = confusion_matrix(y_test,y_pred)
+print('GNB')
+print(cm)
+print(accuracy)
+
+scores=cross_val_score(gnb,x,y,cv=5)
+print(scores)
+
+print(scores.mean())
+
+kfold=KFold(n_splits=3,shuffle=True,random_state=0)
+print(cross_val_score(gnb,x,y,cv=kfold))
+
+loo=LeaveOneOut()
+scores=cross_val_score(gnb,x,y,cv=loo)
+print(scores.mean())
+
+#Naive Bayes BernoulliNB
+from sklearn.naive_bayes import BernoulliNB
+bnb = BernoulliNB()
+bnb.fit(X_train, y_train)
+
+y_pred = bnb.predict(X_test)
+
+cm = confusion_matrix(y_test,y_pred)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+print('BNB')
+print(cm)
+print(accuracy)
+
+scores=cross_val_score(bnb,x,y,cv=5)
+print(scores)
+
+print(scores.mean())
+
+kfold=KFold(n_splits=3,shuffle=True,random_state=0)
+print(cross_val_score(bnb,x,y,cv=kfold))
+
+loo=LeaveOneOut()
+scores=cross_val_score(bnb,x,y,cv=loo)
+print(scores.mean())
