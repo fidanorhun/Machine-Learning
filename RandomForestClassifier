@@ -1,0 +1,44 @@
+import pandas as pd
+from sklearn import preprocessing
+from sklearn import metrics
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import KFold,cross_val_score,train_test_split,LeaveOneOut
+from sklearn.ensemble import RandomForestClassifier
+
+veriler = pd.read_csv('ReplicatedAcousticFeatures-ParkinsonDatabase.csv')
+
+
+minmax_scale = preprocessing.MinMaxScaler().fit(veriler.iloc[:,3:48])
+df_minmax = minmax_scale.transform(veriler.iloc[:,3:48])
+
+ 
+x=df_minmax
+y=veriler.iloc[:,2]
+
+Y=y.values 
+"X=x.values"
+
+x_train, x_test,y_train,y_test = train_test_split(x,Y,test_size=0.33, random_state=1)
+acc_score = []
+
+rfc = RandomForestClassifier(n_estimators=10, criterion = 'entropy')
+rfc.fit(x_train,y_train)
+
+y_pred = rfc.predict(x_test)
+cm = confusion_matrix(y_test,y_pred)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+print('RFC')
+print(cm)
+print(accuracy)
+
+scores=cross_val_score(rfc,x,y,cv=10)
+print(scores)
+
+print(scores.mean())
+
+kfold=KFold(n_splits=3,shuffle=True,random_state=0)
+print(cross_val_score(rfc,x_test,y_pred,cv=kfold))
+
+loo=LeaveOneOut()
+scores=cross_val_score(rfc,x_test,y_pred,cv=loo)
+print(scores.mean())
